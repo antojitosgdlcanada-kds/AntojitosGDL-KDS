@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Comandas - Antojitos Guadalajara</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    :root{
+      --red: #c0392b;
+      --orange: #e67e22;
+      --panel-border: #f3c7a4;
+      --bg-1: #fff8f0;
+      --bg-2: #ffe9d2;
+      --accent-green: #27ae60;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg-1);overflow:hidden}
+    header{
+      background:linear-gradient(90deg,var(--red),var(--orange));
+      color:white;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 10px 10px;
+    }
+    header h3{margin:0;font-weight:600;display:flex;gap:8px;align-items:center}
+    .top-controls{display:flex;gap:10px;align-items:center}
+    main{display:flex;height:calc(100vh - 72px);box-sizing:border-box}
+    /* left panel */
+    #menu-panel{flex:2;padding:16px;overflow:auto;background:linear-gradient(135deg,var(--bg-1),var(--bg-2));border-right:3px solid var(--panel-border)}
+    .categoria{color:#b53c2a;font-weight:700;font-size:1.15rem;margin:10px 0}
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .platillo{
+      background:#fff;border:2px solid var(--orange);border-radius:10px;padding:10px;text-align:left;cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(0,0,0,0.04);
+      display:flex;flex-direction:column;justify-content:space-between;min-height:74px;
+    }
+    .platillo:hover{background:#fff2e1;transform:translateY(-2px)}
+    .platillo .ptitle{font-weight:600;font-size:0.95rem;margin-bottom:6px}
+    .platillo .pprice{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;padding:4px 7px;border-radius:8px;font-size:0.85rem}
+    /* right panel */
+    #orden-panel{flex:1;background:#f9f9f9;padding:14px;display:flex;flex-direction:column;min-width:320px;box-sizing:border-box}
+    .orden-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    .orden-list{flex:1;overflow:auto;padding-right:6px}
+    .orden-item{background:#fff;border:1px solid #e6e6e6;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
+    .orden-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .nombre{font-weight:600}
+    .acciones{display:flex;gap:6px;align-items:center}
+    .qty-controls{display:flex;align-items:center;gap:6px}
+    .qty-controls button{border:none;background:#f1f1f1;border-radius:6px;padding:6px 8px;cursor:pointer}
+    .nota-icon{cursor:pointer;color:var(--orange);margin-left:8px}
+    .nota-text{display:none;margin-top:6px}
+    .total-box{margin-top:10px;border-top:2px solid #e5e5e5;padding-top:12px;font-size:1.2rem;font-weight:700;color:var(--accent-green)}
+    .btn-enviar{margin-top:10px;background:var(--accent-green);color:#fff;border:none;border-radius:10px;padding:12px;font-size:1.05rem;cursor:pointer}
+    .btn-enviar:hover{background:#2ecc71}
+    /* small screens fallback */
+    @media(max-width:900px){ .menu-grid{grid-template-columns:repeat(2,1fr)} }
+  </style>
+</head>
+<body>
+  <header>
+    <h3>🧾 Antojitos Guadalajara</h3>
+    <div class="top-controls">
+      <select id="mesa" class="form-select form-select-sm" style="width:110px">
+        <option value="">Mesa</option>
+        <!-- 1..11 -->
+      </select>
+      <input id="cliente" class="form-control form-control-sm" placeholder="Nombre del cliente (opcional)" style="width:220px">
+    </div>
+  </header>
+
+  <main>
+    <section id="menu-panel">
+      <div id="menu"></div>
+    </section>
+
+    <aside id="orden-panel">
+      <div class="orden-title">
+        <div style="font-size:1.05rem;font-weight:700;color:#0b7a63">Orden Actual</div>
+        <div class="small text-muted" id="orden-meta">—</div>
+      </div>
+
+      <div id="orden-list" class="orden-list"></div>
+
+      <div class="total-box">
+        Subtotal: $<span id="total">0.00</span>
+      </div>
+
+      <button class="btn-enviar" onclick="enviarOrden()">Enviar Orden</button>
+    </aside>
+  </main>
+
+<script>
+/* ----- CONFIG ----- */
+const server = "http://192.168.1.135:5000";
+
+/* ----- MENU (actualizado con tu lista completa) ----- */
+const menu = {
+  "Antojitos": [
+    ["Gorditas - Pork in Salsa",6],
+    ["Gorditas - Chicken Chipotle",6],
+    ["Gorditas - Bistec a la Mexicana",6],
+    ["Gorditas - Choriqueso",6],
+    ["Gorditas - Frijol y Queso",6],
+    ["Gorditas - Mantequilla",6],
+    ["Gorditas - Champiñon",6],
+    ["Tacos - Pork in Salsa",6],
+    ["Tacos - Chicken Chipotle",6],
+    ["Tacos - Bistec a la Mexicana",6],
+    ["Tacos - Choriqueso",6],
+    ["Tacos - Frijol y Queso",6],
+    ["Tacos - Champiñones",6],
+    ["Enchiladas",20],
+    ["Lonche de Pierna",18],
+    ["Quesadilla",6],
+    ["Quesadilla/Pollo",6],
+    ["Quesadilla/Frijol",6],
+    ["Tostada - Pork in Salsa",6],
+    ["Tostada - Chicken Chipotle",6],
+    ["Tostada - Bistec a la Mexicana",6],
+    ["Tostada - Ensalada Rusa",6]
+  ],
+  "Sopas y Especiales": [
+    ["Mole",20],
+    ["Pozole",16],
+    ["Tortitas",20]
+  ],
+  "Postres": [
+    ["Jericalla",6],
+    ["Capirotada Slice",6],
+    ["Elote Bread",6]
+  ],
+  "Bebidas": [
+    ["Pop",3],
+    ["Kefir Water - Glass",4.75],
+    ["Kefir Water - Jug",14],
+    ["Jamaica - Glass",4.75],
+    ["Jamaica - Jug",14],
+    ["Natural Fruit Water - Glass",4.75],
+    ["Natural Fruit Water - Jug",14],
+    ["Natural Fruit Water - 1L",10],
+    ["Horchata - Glass",5],
+    ["Horchata - Jug",15],
+    ["Coca-Cola",5],
+    ["Jarritos",4.5],
+    ["Café de Olla",4],
+    ["Tea",4],
+    ["Atole - Strawberry",6],
+    ["Atole - Walnut",6],
+    ["Atole - Vanilla",6],
+    ["Champurrado",7],
+    ["Corona",7.5],
+    ["Modelo Especial",8],
+    ["Dos Equis",8],
+    ["Sol",8],
+    ["Negra Modelo",8.5],
+    ["Rusa de Guadalajara",6],
+    ["Rusa de Guadalajara w/Tequila",9],
+    ["Classic Margarita",11],
+    ["Chelada",7],
+    ["Michelada",9],
+    ["Toritos",10],
+    ["Frappuccino Jarocho w/Kahlúa",7.5],
+    ["Sandhill Pinot Gris - Glass",8],
+    ["Sandhill Pinot Gris - Bottle",32],
+    ["Sen Chilean Red - Glass",7],
+    ["Sen Chilean Red - Bottle",28],
+    ["1884 Malbec - Glass",9],
+    ["1884 Malbec - Bottle",34],
+    ["Big Crush Pinot Grigio - Glass",10],
+    ["Big Crush Pinot Grigio - Bottle",38],
+    ["Centenario Añejo Shot",10],
+    ["Don Julio Añejo Shot",13],
+    ["Montelobos Espadín Shot",11]
+  ]
+};
+
+/* ----- STATE ----- */
+let orden = []; // {nombre, precio, cantidad, nota, categoria}
+let total = 0;
+
+/* ----- UI: Mesa options ----- */
+const mesaSelect = document.getElementById('mesa');
+for(let i=1;i<=11;i++){
+  const opt=document.createElement('option'); opt.value='Mesa '+i; opt.textContent='Mesa '+i;
+  mesaSelect.appendChild(opt);
+}
+
+/* ----- Render menu ----- */
+function renderMenu(){
+  const cont = document.getElementById('menu');
+  cont.innerHTML = '';
+  for(const cat of Object.keys(menu)){
+    const catDiv = document.createElement('div');
+    catDiv.innerHTML = `<div class="categoria">${cat}</div>`;
+    const grid = document.createElement('div'); grid.className='menu-grid';
+    menu[cat].forEach(([name,price])=>{
+      const p = document.createElement('div'); p.className='platillo';
+      p.innerHTML = `<div class="ptitle">${escapeHtml(name)}</div><div class="pprice">$${formatPrice(price)}</div>`;
+      p.addEventListener('click', ()=> addToOrder(name, price, cat));
+      grid.appendChild(p);
+    });
+    catDiv.appendChild(grid);
+    cont.appendChild(catDiv);
+  }
+}
+
+/* ----- Helpers ----- */
+function formatPrice(p){ return (Number(p).toFixed(2).replace(/\.00$/,'')) }
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+/* ----- Order management ----- */
+function addToOrder(name, price, categoria){
+  // allow duplicates as separate line? We'll group by name
+  const existing = orden.find(o=>o.nombre===name);
+  if(existing){
+    existing.cantidad += 1;
+  }else{
+    orden.push({ nombre: name, precio: Number(price), cantidad: 1, nota: '', categoria });
+  }
+  actualizarOrden();
+}
+
+function actualizarOrden(){
+  const list = document.getElementById('orden-list');
+  list.innerHTML = '';
+  total = 0;
+  orden.forEach((item, idx)=>{
+    const subtotal = item.precio * item.cantidad;
+    total += subtotal;
+    const div = document.createElement('div'); div.className='orden-item';
+    div.innerHTML = `
+      <div class="orden-row">
+        <div style="display:flex;flex-direction:column">
+          <div class="nombre">${escapeHtml(item.nombre)}</div>
+          <div class="small text-muted">${escapeHtml(item.categoria)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end">
+          <div style="font-weight:700">$${formatPrice(subtotal)}</div>
+          <div style="margin-top:6px" class="acciones">
+            <div class="qty-controls">
+              <button type="button" onclick="cambiarCantidad(${idx},-1)">−</button>
+              <div style="min-width:28px;text-align:center">${item.cantidad}</div>
+              <button type="button" onclick="cambiarCantidad(${idx},1)">+</button>
+            </div>
+            <span class="nota-icon" title="Agregar nota" onclick="toggleNota(${idx})">✉️</span>
+            <button class="btn btn-sm btn-outline-danger" onclick="eliminar(${idx})">✕</button>
+          </div>
+        </div>
+      </div>
+      <div class="nota-text" id="nota-${idx}">
+        <textarea class="form-control form-control-sm" placeholder="Notas para este item..." oninput="guardarNota(${idx}, this.value)">${escapeHtml(item.nota||'')}</textarea>
+      </div>
+    `;
+    list.appendChild(div);
+    // initial hide/show for note
+    const noteEl = div.querySelector(`#nota-${idx}`);
+    if(noteEl) noteEl.style.display = item.nota ? 'block' : 'none';
+  });
+  document.getElementById('total').innerText = total.toFixed(2);
+  document.getElementById('orden-meta').innerText = orden.length ? `${orden.length} items` : '—';
+}
+
+function cambiarCantidad(i, delta){
+  orden[i].cantidad += delta;
+  if(orden[i].cantidad <= 0){
+    orden.splice(i,1);
+  }
+  actualizarOrden();
+}
+function eliminar(i){ orden.splice(i,1); actualizarOrden(); }
+function toggleNota(i){
+  const el = document.getElementById(`nota-${i}`);
+  if(!el) return;
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function guardarNota(i, val){ orden[i].nota = val; }
+
+/* ----- Send to server ----- */
+function enviarOrden(){
+  if(!orden.length) return alert('No hay platillos seleccionados.');
+  const mesa = document.getElementById('mesa').value || "Sin número";
+  const cliente = document.getElementById('cliente').value || "";
+  const payload = { mesa, cliente, orden, total };
+  fetch(server + "/orden", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  })
+  .then(r => {
+    if(!r.ok) throw new Error('Network');
+    return r.json().catch(()=>({}));
+  })
+  .then(()=>{
+    alert('✅ Orden enviada a cocina correctamente');
+    orden = []; total = 0;
+    actualizarOrden();
+  })
+  .catch((err)=>{
+    console.error(err);
+    alert('❌ Error al enviar la orden — revisa conexión con servidor');
+  });
+}
+
+/* ----- Init ----- */
+renderMenu();
+actualizarOrden();
+
+</script>
+</body>
+</html>

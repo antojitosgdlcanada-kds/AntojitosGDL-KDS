@@ -1,0 +1,62 @@
+{
+  "Gorditas": [
+    { "nombre": "Pork in salsa", "precio": 18 },
+    { "nombre": "Chicken chipotle", "precio": 18 },
+    { "nombre": "Bistec a la Mexicana", "precio": 18 },
+    { "nombre": "Choriqueso", "precio": 18 },
+    { "nombre": "Beans w cheese", "precio": 18 },
+    { "nombre": "Butter w cheese", "precio": 18 },
+    { "nombre": "Mushrooms with cheese", "precio": 18 },
+    { "nombre": "Any with vegan mozzarella", "precio": 18 }
+  ],
+  "Tacos": [
+    { "nombre": "Pork in salsa", "precio": 18 },
+    { "nombre": "Chicken chipotle", "precio": 18 },
+    { "nombre": "Bistec a la Mexicana", "precio": 18 },
+    { "nombre": "Choriqueso", "precio": 18 },
+    { "nombre": "Beans w cheese", "precio": 18 },
+    { "nombre": "Mushrooms with cheese", "precio": 18 },
+    { "nombre": "Any with vegan mozzarella", "precio": 18 }
+  ],
+  "Enchiladas": [{ "nombre": "4 Pcs", "precio": 20 }],
+  "Lonches": [{ "nombre": "Lonche de pierna", "precio": 18 }],
+  "Quesadillas": [
+    { "nombre": "Cheese", "precio": 6 },
+    { "nombre": "Cheese and Chicken", "precio": 6 },
+    { "nombre": "Cheese and Beans", "precio": 6 }
+  ],
+  "Tostadas": [
+    { "nombre": "Pork in salsa", "precio": 6 },
+    { "nombre": "Chicken chipotle", "precio": 6 },
+    { "nombre": "Bistec a la Mexicana", "precio": 6 },
+    { "nombre": "Vegetarian Ensalada Rusa", "precio": 6 }
+  ],
+  "Specials": [
+    { "nombre": "Mole", "precio": 20 },
+    { "nombre": "Tortitas", "precio": 20 },
+    { "nombre": "Pozole", "precio": 16 }
+  ],
+  "Postres": [
+    { "nombre": "Jericalla", "precio": 6 },
+    { "nombre": "Capirotada Slice", "precio": 6 },
+    { "nombre": "Elote bread (seasonal)", "precio": 6 }
+  ],
+  "Bebidas Frías": [
+    { "nombre": "Pop", "precio": 3 },
+    { "nombre": "Kefir Water", "precio": 4.75 },
+    { "nombre": "Jamaica", "precio": 4.75 },
+    { "nombre": "Season Natural Fruit (Glass)", "precio": 4.75 },
+    { "nombre": "Season Natural Fruit (1L)", "precio": 10 },
+    { "nombre": "Horchata (Glass)", "precio": 5 },
+    { "nombre": "Cocacola", "precio": 5 },
+    { "nombre": "Jarritos", "precio": 4.5 }
+  ],
+  "Bebidas Calientes": [
+    { "nombre": "Café de Olla", "precio": 4 },
+    { "nombre": "Tea", "precio": 4 },
+    { "nombre": "Atole — Strawberry", "precio": 6 },
+    { "nombre": "Atole — Walnut", "precio": 6 },
+    { "nombre": "Atole — Vanella", "precio": 6 },
+    { "nombre": "Champurrado", "precio": 7 }
+  ]
+}

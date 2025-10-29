@@ -1,0 +1,14 @@
+{
+  "name": "antojitosgdl-kds",
+  "version": "1.0.0",
+  "description": "Antojitos Guadalajara KDS - Sistema de Comandas y Cocina",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}
