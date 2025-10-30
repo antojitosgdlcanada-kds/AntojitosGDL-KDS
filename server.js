@@ -36,6 +36,15 @@ app.get("/admin", (req, res) => {
 app.get("/menu", (req, res) => {
   res.sendFile(path.join(__dirname, "menu.json"));
 });
+// --- RECIBIR ORDENES DE MESEROS ---
+app.post("/orden", (req, res) => {
+  console.log("📦 Nueva orden recibida:");
+  console.log(req.body);
+
+  // Aquí puedes guardar la orden en memoria, archivo o base de datos si luego lo deseas
+  res.status(200).json({ success: true, message: "Orden recibida correctamente" });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor AntojitosGDL-KDS corriendo en puerto ${PORT}`);
