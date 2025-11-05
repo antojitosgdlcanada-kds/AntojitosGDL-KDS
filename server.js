@@ -1,37 +1,20 @@
-// --- Antojitos Guadalajara KDS Server ---
-const express = require("express");
-const path = require("path");
-const app = express();
-const PORT = process.env.PORT || 3000;
+// ====== Antojitos Guadalajara KDS ======
+import express from "express";
+import path from "path";
+import bodyParser from "body-parser";
+import { fileURLToPath } from "url";
 
-app.use(express.json());
+const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// --- AUTENTICACIÓN SIMPLE ---
-const auth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    res.setHeader("WWW-Authenticate", "Basic");
-    return res.status(401).send("🔒 Acceso restringido. Ingresa tus credenciales.");
-  }
+// --- Archivos temporales en memoria ---
+let ordenes = [];
 
-  const encoded = authHeader.split(" ")[1];
-  const decoded = Buffer.from(encoded, "base64").toString();
-  const [user, pass] = decoded.split(":");
-
-  // 👇 Cambia estas credenciales si deseas
-  if (user === "antojitosGDL" && pass === "TamaldeKGta") {
-    next();
-  } else {
-    res.setHeader("WWW-Authenticate", "Basic");
-    res.status(401).send("❌ Credenciales inválidas.");
-  }
-};
-
-// Aplica autenticación a las secciones principales
-app.use(["/comandas", "/cocina", "/bar", "/caja", "/admin"], auth);
-
-// --- RUTAS DE PÁGINAS ---
+// ====== Páginas ======
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -56,14 +39,37 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-// --- RECIBIR ORDENES DE MESEROS ---
+// ====== API Ordenes ======
 app.post("/orden", (req, res) => {
-  console.log("📦 Nueva orden recibida:");
-  console.log(req.body);
-  res.status(200).json({ success: true, message: "Orden recibida correctamente" });
+  const orden = req.body;
+  if (!orden || !orden.mesa || !orden.items) {
+    return res.status(400).json({ error: "Orden inválida" });
+  }
+
+  orden.id = Date.now();
+  orden.estado = "pendiente";
+  ordenes.push(orden);
+
+  console.log("📦 Nueva orden recibida:", orden);
+  res.json({ ok: true, mensaje: "Orden recibida" });
 });
 
-// --- INICIAR SERVIDOR ---
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor KDS Antojitos corriendo en puerto ${PORT}`);
+app.get("/ordenes", (req, res) => {
+  res.json(ordenes);
 });
+
+app.post("/orden/listo/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const orden = ordenes.find(o => o.id === id);
+  if (orden) {
+    orden.estado = "listo";
+    console.log("✅ Orden lista:", orden.id);
+    res.json({ ok: true });
+  } else {
+    res.status(404).json({ error: "Orden no encontrada" });
+  }
+});
+
+// ====== Iniciar Servidor ======
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`🚀 Servidor KDS en puerto ${PORT}`));
