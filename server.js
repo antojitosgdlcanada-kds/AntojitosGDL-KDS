@@ -1,13 +1,37 @@
+// --- Antojitos Guadalajara KDS Server ---
 const express = require("express");
 const path = require("path");
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Servir las vistas principales
+// --- AUTENTICACIÓN SIMPLE ---
+const auth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.setHeader("WWW-Authenticate", "Basic");
+    return res.status(401).send("🔒 Acceso restringido. Ingresa tus credenciales.");
+  }
+
+  const encoded = authHeader.split(" ")[1];
+  const decoded = Buffer.from(encoded, "base64").toString();
+  const [user, pass] = decoded.split(":");
+
+  // 👇 Cambia estas credenciales si deseas
+  if (user === "antojitosGDL" && pass === "TamaldeKGta") {
+    next();
+  } else {
+    res.setHeader("WWW-Authenticate", "Basic");
+    res.status(401).send("❌ Credenciales inválidas.");
+  }
+};
+
+// Aplica autenticación a las secciones principales
+app.use(["/comandas", "/cocina", "/bar", "/caja", "/admin"], auth);
+
+// --- RUTAS DE PÁGINAS ---
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -32,20 +56,14 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-// Servir menú dinámico
-app.get("/menu", (req, res) => {
-  res.sendFile(path.join(__dirname, "menu.json"));
-});
 // --- RECIBIR ORDENES DE MESEROS ---
 app.post("/orden", (req, res) => {
   console.log("📦 Nueva orden recibida:");
   console.log(req.body);
-
-  // Aquí puedes guardar la orden en memoria, archivo o base de datos si luego lo deseas
   res.status(200).json({ success: true, message: "Orden recibida correctamente" });
 });
 
-
+// --- INICIAR SERVIDOR ---
 app.listen(PORT, () => {
-  console.log(`Servidor AntojitosGDL-KDS corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor KDS Antojitos corriendo en puerto ${PORT}`);
 });
