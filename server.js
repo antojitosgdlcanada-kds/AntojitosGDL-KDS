@@ -15,9 +15,6 @@ app.use(express.static(path.join(__dirname, "public")));
 let ordenes = [];
 
 // ====== Páginas ======
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
 
 app.get("/comandas", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "comandas.html"));
@@ -50,8 +47,8 @@ app.post("/orden", (req, res) => {
   orden.estado = "pendiente";
   ordenes.push(orden);
 
-  console.log("📦 Nueva orden recibida:", orden);
-  res.json({ ok: true, mensaje: "Orden recibida" });
+ console.log("📦 Nueva orden recibida:", req.body);
+  res.status(200).json({ ok: true, message: "Orden recibida correctamente" });
 });
 
 app.get("/ordenes", (req, res) => {
